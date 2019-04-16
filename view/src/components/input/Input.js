@@ -1,5 +1,16 @@
+const { ipcRenderer } = window.require('electron');
 import React, { Component } from 'react';
 import './styles.css';
+
+function validURL(str) {
+    const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
+}
 
 export default class Input extends Component {
     constructor(props) {
@@ -10,6 +21,13 @@ export default class Input extends Component {
         };
 
         this.switchSearch = this.switchSearch.bind(this);
+        this._handleKeyDown = this._handleKeyDown.bind(this);
+    }
+
+    _handleKeyDown(e) {
+        if (e.key === 'Enter') {
+            this.startDownload();
+        }
     }
 
     switchSearch() {
@@ -18,6 +36,14 @@ export default class Input extends Component {
                 activated: true
             });
         }
+    }
+
+    startDownload() {
+        const url = document.getElementById('search-input').value;
+        if (!url || !validURL(url)) {
+            return;
+        }
+        ipcRenderer.send('download-url', url);
     }
 
     getSearchButtonClass() {
@@ -33,12 +59,11 @@ export default class Input extends Component {
     render() {
         return (
             <div>
-                <div className={this.getSearchButtonClass()} onClick={this.switchSearch}>
+                <div className={this.getSearchButtonClass()} onClick={() => !this.state.activated ? this.switchSearch() : this.startDownload()}>
                     <img className='search-icon' src='static/images/search-icon.png'/>
                 </div>
-                <input className={this.getSearchInputClass()} type='text' placeholder='Paste url to download...'/>
+                <input id='search-input' className={this.getSearchInputClass()} onKeyDown={this._handleKeyDown} type='text' placeholder='Paste url to download...'/>
             </div>
-            
         );
     }
 };
