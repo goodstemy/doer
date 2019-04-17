@@ -70,7 +70,10 @@ export default class App extends Component {
           <div className="container">
             <Input className="flex-item" />
             <div className="flex-item choose-folder-block">
-              <img src="static/images/choose-folder.png" />
+              <img
+                className="choose-folder-block__image"
+                src="static/images/choose-folder.png"
+              />
             </div>
           </div>
         )}

@@ -64,8 +64,13 @@ export default class Input extends Component {
   }
 
   render() {
+    const { className } = this.props;
+    const inputClassName = className
+      ? `${className} search-container`
+      : className;
+
     return (
-      <div>
+      <div className={inputClassName}>
         <div
           className={this.getSearchButtonClass()}
           onClick={() =>

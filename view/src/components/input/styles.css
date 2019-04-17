@@ -1,4 +1,10 @@
+.search-container {
+  position: relative;
+}
+
 .search-button {
+  position: absolute;
+  top: 0;
   width: 60px;
   height: 60px;
   background-color: white;
@@ -7,7 +13,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
   z-index: 10;
 }
 
@@ -33,7 +38,6 @@
 
 .search-input {
   position: relative;
-  top: -60px;
   z-index: 0;
   height: 60px;
   border: none;
