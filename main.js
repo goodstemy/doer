@@ -37,10 +37,10 @@ app.on('activate', () => {
 });
 
 async function downloadFile(e, uri) {
-  const dest = getFileName(uri);
   let contentLength = 0;
 
   let dataToWrite = '';
+  let dest = '';
   let percent = 0;
 
   request(uri, (err, res, body) => {
@@ -50,6 +50,11 @@ async function downloadFile(e, uri) {
     }
   })
   .on('response', (data) => {
+    let filename = getFileName(uri);
+    if (!filename.split('.')[1]) {
+      filename += `.${data.headers['content-type'].split('/')[1].split(';')[0]}`;
+    }
+    dest = path.join(__dirname, path.basename(filename));
     contentLength = data.headers['content-length'];
   })
   .on('data', (chunk) => {
@@ -74,6 +79,5 @@ async function downloadFile(e, uri) {
 }
 
 function getFileName(uri) {
-  const pathname = url.parse(uri).pathname;
-  return path.join(__dirname, path.basename(pathname));
+  return url.parse(uri).pathname;
 }
