@@ -24,6 +24,7 @@
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
+    "node-notifier": "^5.4.0",
     "react": "^16.8.6",
     "react-circular-progressbar": "^1.0.0",
     "react-dom": "^16.8.6",

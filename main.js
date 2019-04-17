@@ -1,7 +1,9 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const http = require('http');
-const https = require('https');
+const request = require('request');
+const notifier = require('node-notifier');
 const fs = require('fs');
+const path = require('path');
+const url = require('url');
 
 let mainWindow;
 
@@ -19,53 +21,10 @@ function createWindow () {
     mainWindow = null;
   });
 
-  ipcMain.on('download-url', (event, arg) => {
+  ipcMain.on('download-url', async (event, arg) => {
     event.sender.send('download-status', 'started');
 
-    let path = `${__dirname}/${arg}`;
-
-    // if (fs.existsSync(path)) {
-    //     const splittedPath = path.split('.');
-    //     splittedPath[splittedPath.length] = splittedPath[splittedPath.length - 1];
-    //     splittedPath[splittedPath.length - 1] = +new Date;
-    //     path = splittedPath.join('');
-    // }
-
-    // console.log(path);
-    // const file = fs.createWriteStream(path);
-
-    if (arg.split(':')[0] === 'https') {
-        https.get(arg, (res) => {
-            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers['location']) {
-                
-            }
-            console.log('statusCode:', res.statusCode);
-            console.log('headers:', res.headers);
-
-            res.on('data', (d) => {
-                process.stdout.write(d);
-            });
-        }).on('error', (e) => {
-            console.error(e);
-        });
-    }
-
-    // if (arg.split('/')[0] === 'http')
-
-    
-
-    // let i = 0;
-    // let interval = null;
-
-    // interval = setInterval(() => {
-    //     if (i === 100) {
-    //         clearInterval(interval);
-    //     }
-    //     event.sender.send('download-status', {
-    //         percent: i
-    //     });
-    //     i++;
-    // }, 50);
+    await downloadFile(event, arg).catch(console.error);
   });
 }
 
@@ -76,3 +35,45 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) createWindow();
 });
+
+async function downloadFile(e, uri) {
+  const dest = getFileName(uri);
+  let contentLength = 0;
+
+  let dataToWrite = '';
+  let percent = 0;
+
+  request(uri, (err, res, body) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+  })
+  .on('response', (data) => {
+    contentLength = data.headers['content-length'];
+  })
+  .on('data', (chunk) => {
+    dataToWrite += chunk.toString();
+    fs.appendFileSync(dest, chunk, (err) => console.error);
+    if (percent !== Math.floor(dataToWrite.length / contentLength * 100)) {
+      percent = Math.floor(dataToWrite.length / contentLength * 100);
+      e.sender.send('download-status', {percent});
+      console.log(`${percent}% downloaded...`);
+    }
+  })
+  .on('end', () => {
+    e.sender.send('download-status', {percent: 100});
+    e.sender.send('download-status', 'finished');
+
+    console.log('Downloaded');
+    notifier.notify({
+      title: 'DOER Notification',
+      message: `File ${dest.split('/').pop()} downloaded to ${dest}`
+    });
+  });
+}
+
+function getFileName(uri) {
+  const pathname = url.parse(uri).pathname;
+  return path.join(__dirname, path.basename(pathname));
+}

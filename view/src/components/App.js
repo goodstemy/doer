@@ -20,23 +20,28 @@ export default class App extends Component {
     }
 
     downloadStarted(event, arg) {
-        if (typeof arg === 'string') {
-            this.setState({
-                isDownload: true
-            });
-        } else if (typeof arg === 'object') {
-            this.setState({
-                downloadPercent: arg.percent
-            });
-
-            if (arg.percent === 100) {
-                setTimeout(() => {
+        console.log(arg);
+        switch (typeof arg) {
+            case 'string':
+                if (arg === 'started') {
                     this.setState({
-                        isDownload: false,
-                        downloadPercent: 0
+                        isDownload: true
                     });
-                }, 1000);
-            }
+                } else if (arg === 'finished') {
+                    setTimeout(() => {
+                        this.setState({
+                            isDownload: false,
+                            downloadPercent: 0
+                        });
+                    }, 1000);
+                }
+                break;
+            case 'object':
+                this.setState({
+                    downloadPercent: arg.percent
+                });
+                break;
+            default:
         }
     }
 
