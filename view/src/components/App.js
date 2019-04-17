@@ -49,18 +49,26 @@ export default class App extends Component {
         return (
             <div>
                 {this.state.isDownload ? 
-                    <CircularProgressbar 
-                    strokeWidth={6} 
-                    percentage={this.state.downloadPercent}
-                    text={`${this.state.downloadPercent}%`}
-                    styles={{
-                        width: '100px', 
-                        height: '100px',
-                        path: { stroke: `rgba(254, 134, 132, ${this.state.downloadPercent / 100})` },
-                        text: { fill: '#f88', fontSize: '16px' },
-                    }}/>
+                    <div className='container'>
+                        <CircularProgressbar 
+                        strokeWidth={6} 
+                        percentage={this.state.downloadPercent}
+                        text={`${this.state.downloadPercent}%`}
+                        className='flex-item'
+                        styles={{
+                            width: '100px', 
+                            height: '100px',
+                            path: { stroke: `rgba(254, 134, 132, ${this.state.downloadPercent / 100})` },
+                            text: { fill: '#f88', fontSize: '16px' },
+                        }}/>
+                    </div>
                 :
-                    <Input className='flex-item'/>
+                    <div className='container'>
+                        <Input className='flex-item'/>
+                        <div className='flex-item choose-folder-block'>
+                            <img src='static/images/choose-folder.png'></img>
+                        </div>
+                    </div>
                 }
             </div>
         );
